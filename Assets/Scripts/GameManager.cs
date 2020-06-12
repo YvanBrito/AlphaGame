@@ -28,8 +28,9 @@ public class GameManager : MonoBehaviour {
     private float pointsHeight;
     private float pointsLights;
     private int score;
-    private const int timeToNextAd = 150;
+    private const int timeToNextAd = 300;
     private float timeSinceLastAd = 0;
+    private bool flag;
     
     private void setIsBallAlive(bool b)
     {
@@ -61,7 +62,7 @@ public class GameManager : MonoBehaviour {
         score = (int)(pointsHeight + pointsLights);
         points.text = score.ToString();
 
-        print(Time.realtimeSinceStartup + "   |   " + (timeSinceLastAd + timeToNextAd));
+        //print(Time.realtimeSinceStartup + "   |   " + (timeSinceLastAd + timeToNextAd));
         if (!isBallAlive)
         {
             if (Time.realtimeSinceStartup >= timeSinceLastAd + timeToNextAd)
@@ -94,12 +95,16 @@ public class GameManager : MonoBehaviour {
     void VerifyInput() {
 
         if (Input.GetMouseButtonDown(0) && !isPaused) {
-            firstPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            plat2 = Instantiate(platPrefab, firstPos, Quaternion.identity) as Plataform;
-            plat2.GetComponent<Collider2D>().enabled = false;
+            if (Input.mousePosition.y < Screen.height / 2)
+            {
+                firstPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                plat2 = Instantiate(platPrefab, firstPos, Quaternion.identity) as Plataform;
+                plat2.GetComponent<Collider2D>().enabled = false;
+                flag = true;
+            }
         }
 
-        if (Input.GetMouseButton(0) && !isPaused) {
+        if (Input.GetMouseButton(0) && !isPaused && flag) {
             Vector2 mouse2dPosScreen = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
             Vector2 mouse2dPosWorld = Camera.main.ScreenToWorldPoint(new Vector2(Input.mousePosition.x, Input.mousePosition.y));
 
@@ -118,12 +123,20 @@ public class GameManager : MonoBehaviour {
             plat2.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
         }
 
-        if (Input.GetMouseButtonUp(0) && !isPaused) {
+        if (Input.GetMouseButtonUp(0) && !isPaused && flag) {
             if (plat2)
             {
-                plat2.GetComponent<Collider2D>().enabled = true;
-				plat2.GetComponent<SpriteRenderer>().color = new Color(plat2.GetComponent<SpriteRenderer>().color.r, plat2.GetComponent<SpriteRenderer>().color.g, plat2.GetComponent<SpriteRenderer>().color.b, 255);
-                plat2.ready = true;
+                if (Input.mousePosition.y < Screen.height / 2)
+                {
+                    plat2.GetComponent<Collider2D>().enabled = true;
+                    plat2.GetComponent<SpriteRenderer>().color = new Color(plat2.GetComponent<SpriteRenderer>().color.r, plat2.GetComponent<SpriteRenderer>().color.g, plat2.GetComponent<SpriteRenderer>().color.b, 255);
+                    plat2.ready = true;
+                    flag = false;
+                }
+                else
+                {
+                    Destroy(plat2.gameObject);
+                }
             }
         }
 
@@ -170,8 +183,7 @@ public class GameManager : MonoBehaviour {
         }
         isPaused = !isPaused;
         Time.timeScale = isPaused ? 0.0f : 1.0f;
-
-        print("Saiu lá");
+        
         yield return null;
     }
 
@@ -225,7 +237,7 @@ public class GameManager : MonoBehaviour {
 
     IEnumerator ScoreScreen()
     {
-        yield return new WaitForSeconds(2);
+        yield return null;
         scorePanel.SetActive(true);
         bestScorePanel.text = "BEST: " + PlayerPrefs.GetFloat("BestScore").ToString();
         scoreScorePanel.text = "Score: " + score.ToString();

@@ -40,10 +40,20 @@ public class Ball : MonoBehaviour {
 
     void OnCollisionEnter2D(Collision2D coll) {
         if (coll.transform.tag == "Plataform") {
-            if (coll.transform.localScale.x <= 1)
-                mRigidBody2D.AddForce(new Vector2(0, 450));
+            float jumpForce = Mathf.Clamp(700 / coll.transform.GetComponent<BoxCollider2D>().size.x, 100, 700);
+            mRigidBody2D.AddForce(new Vector2(0, jumpForce));
+
+            print(coll.transform.GetComponent<BoxCollider2D>().size);
+        }else if (coll.transform.tag == "Lateral")
+        {
+            if (coll.transform.name.Contains("Right"))
+            {
+                mRigidBody2D.AddForce(new Vector2(50, 0));
+            }
             else
-                mRigidBody2D.AddForce(new Vector2(0, 450/coll.transform.localScale.x));
+            {
+                mRigidBody2D.AddForce(new Vector2(-50, 0));
+            }
         }
     }
 
