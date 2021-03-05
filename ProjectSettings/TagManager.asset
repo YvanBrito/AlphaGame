@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Plataform
   - Lateral
+  - Fire
+  - Block
   layers:
   - Default
   - TransparentFX
